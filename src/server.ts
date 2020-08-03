@@ -1,5 +1,7 @@
-import express, { Response, Request, Application } from 'express';
+import express, { Response, Request, Application, json, urlencoded } from 'express';
 import dotenv from 'dotenv';
+
+import * as userRepository from "./repository/UserRepository";
 
 import { pool } from './db/db';
 
@@ -8,22 +10,23 @@ dotenv.config();
 const app: Application = express();
 const PORT: Number = parseInt(`${process.env.PORT}`, 10) || 3000;
 
+app.use(json());
+app.use(urlencoded({ extended: true }));
+
 app.get('/', (req: Request, res: Response) => res.send(`I'm a working server`));
 
-// test data base
+// test user repo
 app.post('/user/add', async (req: Request, res: Response) => {
-  const SQL: string =
-    'INSERT INTO app_user (username, password) VALUES($1, $2) RETURNING *';
-  const params: string[] = ['felipe3', 'pass'];
-  let result;
-
+  let newUser;
+  const {username, password} = req.body;
   try {
-    result = await pool.query(SQL, params);
+   let result = await userRepository.add(username, password);
+    newUser = result?.rows[0];
   } catch (err) {
+    console.log(err);
     res.status(400).send(err.detail);
   }
-  
-  res.status(201).send(result?.rows[0]);
+  res.status(201).send(newUser);
 });
 
 app.listen(PORT, () => {
