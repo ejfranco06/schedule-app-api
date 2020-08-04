@@ -1,9 +1,14 @@
-import express, { Response, Request, Application, json, urlencoded } from 'express';
+import express, {
+  Response,
+  Request,
+  Application,
+  json,
+  urlencoded,
+  NextFunction,
+} from 'express';
 import dotenv from 'dotenv';
-
-import * as userRepository from "./repository/UserRepository";
-
-import { pool } from './db/db';
+import './auth/auth';
+import { userController } from './controller/UserController';
 
 dotenv.config();
 
@@ -15,18 +20,13 @@ app.use(urlencoded({ extended: true }));
 
 app.get('/', (req: Request, res: Response) => res.send(`I'm a working server`));
 
-// test user repo
-app.post('/user/add', async (req: Request, res: Response) => {
-  let newUser;
-  const {username, password} = req.body;
-  try {
-   let result = await userRepository.add(username, password);
-    newUser = result?.rows[0];
-  } catch (err) {
-    console.log(err);
-    res.status(400).send(err.detail);
-  }
-  res.status(201).send(newUser);
+//mount users
+app.use('/user', userController);
+
+// Handler errors
+app.use(function (err: any, req: Request, res: Response, next: NextFunction) {
+  res.status(err.status || 500);
+  res.json({ message: err.message });
 });
 
 app.listen(PORT, () => {
