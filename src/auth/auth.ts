@@ -14,8 +14,7 @@ passport.use(
   new LocalStrategy(async (username: string, password: string, done) => {
     try {
       const hashPassword = await bcrypt.hash(password, hashRounds);
-      let result = await userRepository.add(username, hashPassword);
-      let newUser = result?.rows[0];
+      let newUser = await userRepository.add(username, hashPassword);
       return done(null, newUser);
     } catch (error) {
       error.status = error?.status || 401;
@@ -27,5 +26,22 @@ passport.use(
 
 passport.use(
   'login',
-  new LocalStrategy(async (username, password, done) => {})
+  new LocalStrategy(async (username: string, password: string, done) => {
+    try {
+      const user = await userRepository.findByUserName(username);
+      //No User found
+      if (!user) throw new Error(`Login error username/password don't match`);
+      const isValid = await bcrypt.compare(password, user.password);
+      if (!isValid)
+        throw new Error(`Login error username/password don't match`);
+      const userInfo = {
+        username: user.username,
+      };
+      return done(null, userInfo);
+    } catch (error) {
+      error.status = error?.status || 401;
+      error.message = error?.detail || error?.message || 'Login Error';
+      return done(error);
+    }
+  })
 );

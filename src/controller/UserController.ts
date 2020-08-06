@@ -13,3 +13,16 @@ userController.post(
     });
   }
 );
+
+userController.post(
+  '/login',
+  passport.authenticate('login', { session: false,  failWithError: true  }),
+  async (req: Request, res: Response) => {
+    // Create token from user
+    const token  = " bad fake token" 
+    res.status(200).json({
+      message: 'User login successful',
+      token: token
+    });
+  }
+);
