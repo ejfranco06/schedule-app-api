@@ -1,11 +1,17 @@
 import express, { Response, Request, Router } from 'express';
 import passport from 'passport';
 
+import { generateToken } from '../service/JWTService';
+
 export const userController: Router = express.Router();
+
+interface CustomUser {
+  username?: string;
+}
 
 userController.post(
   '/register',
-  passport.authenticate('register', { session: false,  failWithError: true  }),
+  passport.authenticate('register', { session: false, failWithError: true }),
   async (req: Request, res: Response) => {
     res.status(201).json({
       message: 'User registered',
@@ -16,13 +22,17 @@ userController.post(
 
 userController.post(
   '/login',
-  passport.authenticate('login', { session: false,  failWithError: true  }),
+  passport.authenticate('login', { session: false, failWithError: true }),
   async (req: Request, res: Response) => {
-    // Create token from user
-    const token  = " bad fake token" 
-    res.status(200).json({
-      message: 'User login successful',
-      token: token
-    });
+    try {
+      const { username } = req.user as CustomUser;
+      const token = await generateToken('felipe');
+      res.status(200).json({
+        message: 'User login successful',
+        token: token,
+      });
+    } catch (error) {
+      res.status(401).json({ message: error.message });
+    }
   }
 );
