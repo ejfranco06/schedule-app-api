@@ -7,6 +7,7 @@ import express, {
   NextFunction,
 } from 'express';
 import dotenv from 'dotenv';
+import cors from "cors";
 import './auth/auth';
 import { userController } from './controller/UserController';
 
@@ -15,6 +16,7 @@ dotenv.config();
 const app: Application = express();
 const PORT: Number = parseInt(`${process.env.PORT}`, 10) || 3000;
 
+app.use(cors());
 app.use(json());
 app.use(urlencoded({ extended: true }));
 
