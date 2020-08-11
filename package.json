@@ -2,7 +2,10 @@
   "name": "schedule-app-api",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "engines": {
+    "node": "12.x"
+  },
+  "main": "./build/server.js",
   "scripts": {
     "build-ts": "tsc",
     "dev": "ts-node-dev --transpile-only --ignore-watch node_modules src/server.ts",
